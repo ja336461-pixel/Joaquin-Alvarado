@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Línea del Tiempo: El Hombre en la Filosofía</title>
   <style>
     * {
@@ -25,7 +25,7 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       position: relative;
-      touch-action: none;
+      touch-action: pinch-zoom;
     }
 
     /* BOTÓN DE PANTALLA COMPLETA */
@@ -1152,8 +1152,9 @@
       nodeElements.push(hitArea);
     });
 
-    const firstTop = parseFloat(filosofosData[0].top);
-    const lastTop = parseFloat(filosofosData[filosofosData.length - 1].top);
+    const allTops = filosofosData.map(f => parseFloat(f.top));
+    const firstTop = Math.min(...allTops);
+    const lastTop = Math.max(...allTops);
     const trackEl = document.querySelector('.connector-track');
     const origenEl = document.querySelector('.axis-label.origen');
     const finalEl = document.querySelector('.axis-label.final');
@@ -1202,13 +1203,13 @@
       const maxY = -((firstTop / 100 - 0.5) * stageHeight);
 
       const absDelta = Math.abs(e.deltaY);
-      const boost = absDelta > 180 ? 1.35 : 1.0;
-      const deltaUnscaled = (e.deltaY * boost) / (ZOOM_SCALE * 2.8);
+      const boost = absDelta > 150 ? 1.8 : 1.5;
+      const deltaUnscaled = (e.deltaY * boost) / (ZOOM_SCALE * 1.4);
 
       currentTranslateY = Math.max(minY, Math.min(maxY, currentTranslateY - deltaUnscaled));
       applyStageTransform(false);
       updateActiveHighlightWhileMoving();
-      scheduleMagnetSnap(absDelta > 180 ? 200 : 140);
+      scheduleMagnetSnap(320);
     }, { passive: false });
 
     let touchStartY = 0;
@@ -1229,7 +1230,7 @@
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isZoomed || !isTouchingZoom || document.body.classList.contains('has-expanded-card')) return;
+      if (!isZoomed || !isTouchingZoom || e.touches.length !== 1 || document.body.classList.contains('has-expanded-card')) return;
       const nowY = e.touches[0].clientY;
       const nowTime = performance.now();
       const dt = Math.max(1, nowTime - touchLastTime);
